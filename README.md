@@ -1,6 +1,6 @@
-# Bitcoin Address API
+# Next unused address
 
-Tiny HTTP API that serves random Bitcoin addresses derived from a descriptor.
+Tiny HTTP API that serves the first unused Bitcoin address derived from a descriptor.
 
 Supports single-sig, multisig, and BIP389 multipath descriptors.
 
@@ -11,11 +11,18 @@ Supports single-sig, multisig, and BIP389 multipath descriptors.
    uv sync
    ```
 
-2. Create `.env` file with your descriptor and optional mempool URL:
+2. Create `.env` file:
    ```bash
-   echo 'DESCRIPTOR=wpkh(xpub.../0/*)' > .env
-   echo 'MEMPOOL_URL=https://mempool.space' >> .env  # optional, this is the default
+   cp .env.example .env
+   # Edit .env with your values
    ```
+
+   | Variable | Required | Default | Description |
+   |----------|----------|---------|-------------|
+   | `DESCRIPTOR` | Yes | - | Bitcoin output descriptor |
+   | `MEMPOOL_URL` | Yes | - | Mempool instance URL |
+   | `BIND_ADDRESS` | No | `127.0.0.1` | Interface to bind (`0.0.0.0` for external access) |
+   | `LISTENING_PORT` | No | `8080` | Port to listen on |
 
 3. Run the server:
    ```bash
@@ -45,12 +52,26 @@ wpkh(xpub.../<0;1>/*)
 curl http://localhost:8080/address
 ```
 
-Response:
-```json
-{
-  "address": "bc1q...",
-  "index": 4
-}
+Returns the first unused address (plain text):
+
+```
+bc1q...
 ```
 
-Returns the first unused address (zero balance) by scanning from index 0 until an empty address is found.
+Scans from index 0 until finding an address with no transaction history.
+
+## Warming up
+
+The app stores which indices already have been discarded due to having been used in the past, but it only keeps that in memory for simplicity. This means, on a fresh start, it will iterate from the first address in the derivation path until it finds the first unused one, which can take a bit of time depending on your wallet.
+
+Because of this, it may be a good idea to ensure that, any time you start the app up, you also make a first call right after to warm up the in memory cache.
+
+## Privacy and security
+
+- **Mempool instance**: The mempool server you query learns which addresses belong to your wallet. Use your own instance if this matters.
+- **Endpoint exposure**: Anyone with access to the `/address` endpoint can enumerate your addresses by calling it repeatedly. Keep `BIND_ADDRESS` as `127.0.0.1` and only allow trusted local apps to reach it.
+- **Descriptor secrecy**: Your xpub/descriptor lets anyone derive all your addresses and view balances. Keep `.env` secure and out of version control.
+
+## Why this
+
+We wanted to have a simple solution to serve addresses for donation purposes in the [Barcelona Bitcoin Only meetup homepage](https://bitcoinbarcelona.xyz), and didn't feel like raising a full BTCPayserver just for this was sensible. We currently use this app to dynamically write the address into the homepage when someone requests it.

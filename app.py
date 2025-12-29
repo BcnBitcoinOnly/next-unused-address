@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Flask, jsonify
+from flask import Flask
 from dotenv import load_dotenv
 from embit.descriptor import Descriptor
 
@@ -40,20 +40,18 @@ def has_tx_history(address: str) -> bool:
     return tx_count > 0
 
 
-def find_unused_address() -> tuple[str, int]:
+def find_unused_address() -> str:
     """Find the first address with no transaction history."""
     index = 0
     while True:
-        already_seen = index in used_indices
-        if already_seen:
+        if index in used_indices:
             index += 1
             continue
         
         address = derive_address(index)
         if not has_tx_history(address):
-            return address, index
+            return address
         
-        # Cache this index as used
         used_indices.add(index)
         index += 1
 
@@ -61,9 +59,10 @@ def find_unused_address() -> tuple[str, int]:
 @app.route("/address", methods=["GET"])
 def get_address():
     """Return the first address that has never received any sats."""
-    address, index = find_unused_address()
-    return jsonify({"address": address, "index": index})
+    return find_unused_address()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    bind_address = os.getenv("BIND_ADDRESS", "127.0.0.1")
+    listening_port = int(os.getenv("LISTENING_PORT", "8080"))
+    app.run(host=bind_address, port=listening_port)
