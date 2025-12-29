@@ -11,9 +11,10 @@ Supports single-sig, multisig, and BIP389 multipath descriptors.
    uv sync
    ```
 
-2. Create `.env` file with your descriptor:
+2. Create `.env` file with your descriptor and optional mempool URL:
    ```bash
-   echo 'DESCRIPTOR=wpkh(xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8/0/*)' > .env
+   echo 'DESCRIPTOR=wpkh(xpub.../0/*)' > .env
+   echo 'MEMPOOL_URL=https://mempool.space' >> .env  # optional, this is the default
    ```
 
 3. Run the server:
@@ -48,8 +49,9 @@ Response:
 ```json
 {
   "address": "bc1q...",
-  "index": 4
+  "index": 4,
+  "balance_sats": 0
 }
 ```
 
-Each call returns a random address from the first 10 derivation indices.
+Each call returns a random address from the first 10 derivation indices, with balance fetched from mempool.space.
