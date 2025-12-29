@@ -17,12 +17,10 @@ Supports single-sig, multisig, and BIP389 multipath descriptors.
    # Edit .env with your values
    ```
 
-   | Variable | Required | Default | Description |
-   |----------|----------|---------|-------------|
-   | `DESCRIPTOR` | Yes | - | Bitcoin output descriptor |
-   | `MEMPOOL_URL` | Yes | - | Mempool instance URL |
-   | `BIND_ADDRESS` | No | `127.0.0.1` | Interface to bind (`0.0.0.0` for external access) |
-   | `LISTENING_PORT` | No | `8080` | Port to listen on |
+   - `DESCRIPTOR` (required): Bitcoin output descriptor
+   - `MEMPOOL_URL` (required): Mempool instance URL
+   - `BIND_ADDRESS` (optional, default `127.0.0.1`): Interface to bind (`0.0.0.0` for external access)
+   - `LISTENING_PORT` (optional, default `8080`): Port to listen on
 
 3. Run the server:
    ```bash
@@ -68,10 +66,10 @@ Because of this, it may be a good idea to ensure that, any time you start the ap
 
 ## Privacy and security
 
-- **Mempool instance**: The mempool server you query learns which addresses belong to your wallet. Use your own instance if this matters.
-- **Endpoint exposure**: Anyone with access to the `/address` endpoint can enumerate your addresses by calling it repeatedly. Keep `BIND_ADDRESS` as `127.0.0.1` and only allow trusted local apps to reach it.
-- **Descriptor secrecy**: Your xpub/descriptor lets anyone derive all your addresses and view balances. Keep `.env` secure and out of version control.
+- The mempool server you query learns which addresses belong to your wallet. Use your own instance if this matters.
+- Anyone with access to the `/address` endpoint can enumerate your addresses by calling it repeatedly. Keep `BIND_ADDRESS` as `127.0.0.1` and only allow trusted local apps to reach it.
+- Your xpub/descriptor lets anyone derive all your addresses and view balances. Keep `.env` secure.
 
 ## Why this
 
-We wanted to have a simple solution to serve addresses for donation purposes in the [Barcelona Bitcoin Only meetup homepage](https://bitcoinbarcelona.xyz), and didn't feel like raising a full BTCPayserver just for this was sensible. We currently use this app to dynamically write the address into the homepage when someone requests it.
+We wanted to have a simple solution to serve addresses for donation purposes in the [Barcelona Bitcoin Only meetup homepage](https://bitcoinbarcelona.xyz), and didn't feel like deploying a full BTCPayserver instance just for this was sensible. We currently use this app to dynamically write the address into the homepage when someone requests it.
