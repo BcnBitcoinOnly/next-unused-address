@@ -1,0 +1,11 @@
+[project]
+name = "btc-address-api"
+version = "0.1.0"
+description = "Tiny HTTP API that serves random Bitcoin addresses from a descriptor"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0.0",
+    "python-dotenv>=1.0.0",
+    "embit>=0.8.0",
+]
+
