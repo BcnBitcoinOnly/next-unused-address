@@ -49,9 +49,8 @@ Response:
 ```json
 {
   "address": "bc1q...",
-  "index": 4,
-  "balance_sats": 0
+  "index": 4
 }
 ```
 
-Each call returns a random address from the first 10 derivation indices, with balance fetched from mempool.space.
+Returns the first unused address (zero balance) by scanning from index 0 until an empty address is found.

@@ -1,5 +1,4 @@
 import os
-import random
 import requests
 from flask import Flask, jsonify
 from dotenv import load_dotenv
@@ -17,9 +16,6 @@ MEMPOOL_URL = os.getenv("MEMPOOL_URL", "https://mempool.space")
 
 # Parse descriptor once at startup
 DESC = Descriptor.from_string(DESCRIPTOR)
-
-# Derive addresses from index 0 to this max (exclusive)
-MAX_INDEX = 10
 
 
 def derive_address(index: int) -> str:
@@ -46,13 +42,22 @@ def get_balance(address: str) -> int:
     return funded - spent
 
 
+def find_empty_address() -> tuple[str, int]:
+    """Find the first address with zero balance."""
+    index = 0
+    while True:
+        address = derive_address(index)
+        balance = get_balance(address)
+        if balance == 0:
+            return address, index
+        index += 1
+
+
 @app.route("/address", methods=["GET"])
 def get_address():
-    """Return a random Bitcoin address derived from the descriptor."""
-    index = random.randint(0, MAX_INDEX - 1)
-    address = derive_address(index)
-    balance = get_balance(address)
-    return jsonify({"address": address, "index": index, "balance_sats": balance})
+    """Return the first unused (zero balance) address from the descriptor."""
+    address, index = find_empty_address()
+    return jsonify({"address": address, "index": index})
 
 
 if __name__ == "__main__":
