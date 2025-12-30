@@ -60,9 +60,9 @@ Scans from index 0 until finding an address with no transaction history.
 
 ## Warming up
 
-The app stores which indices already have been discarded due to having been used in the past, but it only keeps that in memory for simplicity. This means, on a fresh start, it will iterate from the first address in the derivation path until it finds the first unused one, which can take a bit of time depending on your wallet.
+The app keeps track of the highest unused index in memory. This is lost everytime you shutdown and restart. 
 
-Because of this, it may be a good idea to ensure that, any time you start the app up, you also make a first call right after to warm up the in memory cache.
+On boot, the runtime will start iterating through addresses until it finds the first unused one. On a wallet with many used addresses, this might take a while.
 
 ## Privacy and security
 
