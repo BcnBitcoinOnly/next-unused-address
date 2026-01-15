@@ -11,9 +11,12 @@ app = Flask(__name__)
 DESCRIPTOR = os.getenv("DESCRIPTOR")
 if not DESCRIPTOR:
     raise ValueError("DESCRIPTOR not found in environment variables")
-MEMPOOL_URL = os.getenv("MEMPOOL_URL")
-if not MEMPOOL_URL:
-    raise ValueError("MEMPOOL_URL not found in environment variables")
+MEMPOOL_URLS_RAW = os.getenv("MEMPOOL_URLS")
+if not MEMPOOL_URLS_RAW:
+    raise ValueError("MEMPOOL_URLS not found in environment variables")
+MEMPOOL_URLS = [url.strip() for url in MEMPOOL_URLS_RAW.split(",") if url.strip()]
+if not MEMPOOL_URLS:
+    raise ValueError("MEMPOOL_URLS must contain at least one URL")
 
 DESC = Descriptor.from_string(DESCRIPTOR)
 first_unused_index: int = 0
@@ -27,17 +30,28 @@ def derive_address(index: int) -> str:
 
 
 def has_tx_history(address: str) -> bool:
-    """Check if an address has any transaction history."""
-    url = f"{MEMPOOL_URL}/api/address/{address}"
-    resp = requests.get(url, timeout=10)
-    resp.raise_for_status()
-    data = resp.json()
+    """Check if an address has any transaction history.
 
-    chain = data.get("chain_stats", {})
-    mempool = data.get("mempool_stats", {})
+    Tries each mempool instance in order until one succeeds.
+    Raises an exception if all instances fail.
+    """
+    last_exception = None
+    for mempool_url in MEMPOOL_URLS:
+        try:
+            url = f"{mempool_url}/api/address/{address}"
+            resp = requests.get(url, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
 
-    tx_count = chain.get("tx_count", 0) + mempool.get("tx_count", 0)
-    return tx_count > 0
+            chain = data.get("chain_stats", {})
+            mempool = data.get("mempool_stats", {})
+
+            tx_count = chain.get("tx_count", 0) + mempool.get("tx_count", 0)
+            return tx_count > 0
+        except Exception as e:
+            last_exception = e
+            continue
+    raise RuntimeError(f"All mempool instances failed. Last error: {last_exception}")
 
 
 def find_unused_address(offset: int) -> tuple[int, str]:
