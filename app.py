@@ -50,7 +50,7 @@ def has_tx_history(address: str) -> bool:
             return tx_count > 0
         except Exception as e:
             last_exception = e
-            continue
+
     raise RuntimeError(f"All mempool instances failed. Last error: {last_exception}")
 
 
