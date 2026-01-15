@@ -18,7 +18,7 @@ Supports single-sig, multisig, and BIP389 multipath descriptors.
    ```
 
    - `DESCRIPTOR` (required): Bitcoin output descriptor
-   - `MEMPOOL_URL` (required): Mempool instance URL
+   - `MEMPOOL_URLS` (required): Comma-separated list of mempool instance URLs. Tried in order; falls back to next on failure.
    - `BIND_ADDRESS` (optional, default `127.0.0.1`): Interface to bind (`0.0.0.0` for external access)
    - `LISTENING_PORT` (optional, default `8080`): Port to listen on
 
